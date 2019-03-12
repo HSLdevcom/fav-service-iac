@@ -1,0 +1,7 @@
+---
+- name: Remove resource group for the app and plan
+  azure_rm_resourcegroup:
+    name: "{{ az_resource_group }}"
+    location: "{{ az_region }}"
+    state: absent
+    force: yes

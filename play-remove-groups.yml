@@ -1,0 +1,7 @@
+- name:
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  roles:
+    - azure_remove_resourcegroups

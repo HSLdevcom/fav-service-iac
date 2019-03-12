@@ -1,0 +1,16 @@
+---
+- name: Remove Storage account
+  azure_rm_storageaccount:
+    resource_group: "{{ az_resource_group }}"
+    name: "{{ az_function_app }}Storage"
+    state: absent
+
+#- name: Remove Redis
+#  command: "az redis delete --name {{ az_function_app }}Redis --resource-group {{ az_resource_group }} -y"
+
+- name: Remove App
+  azure_rm_webapp:
+    resource_group: "{{ az_resource_group }}"
+    name: "{{ az_function_app }}"
+    plan:  "{{ az_function_app_plan }}"
+    state: absent
