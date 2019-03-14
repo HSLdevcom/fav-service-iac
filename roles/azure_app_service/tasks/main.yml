@@ -7,6 +7,15 @@
     sku: S1
     number_of_workers: 1
 
+- name: Create Redis instance
+  command: >
+    az redis create 
+    -l {{ az_region }}
+    -n {{ az_project }}Redis
+    -g {{ az_resource_group }}
+    --sku standard
+    --vm-size C0
+
 # Storage Account name must be lowercase
 - name: Create Storage account
   azure_rm_storageaccount:
@@ -16,20 +25,9 @@
     account_type: Standard_LRS
 
 - name: Create Function App
-  command: "az functionapp create --name {{ az_function_app }} --resource-group {{ az_resource_group }} --storage-account {{ az_storage_account }} --plan {{ az_function_app_plan }}"
-
-#- name: Create Function App
-#  azure_rm_functionapp:
-#    resource_group: "{{ az_resource_group }}"
-#    name: "{{ az_function_app }}"
-#    storage_account: "{{ az_storage_account }}"
-
-#- name: Create Redis instance
-#  command: "az redis create -l {{ az_region }} -n {{ az_project }}Redis -g {{ az_resource_group }} --sku standard --vm-size C0"
-
-#  azure_rm_rediscache:
-#    resource_group: "{{ az_resource_group }}"
-#    name: "{{ az_project }}Redis"
-#    sku:
-#      name: standard
-#      size: C0
+  command: >
+    az functionapp create
+    --name {{ az_function_app }}
+    --resource-group {{ az_resource_group }}
+    --storage-account {{ az_storage_account }}
+    --plan {{ az_function_app_plan }}

@@ -1,1 +1,2 @@
 az_environment: prod
+az_git_branch: master

@@ -5,8 +5,8 @@
     name: "{{ az_function_app }}Storage"
     state: absent
 
-#- name: Remove Redis
-#  command: "az redis delete --name {{ az_function_app }}Redis --resource-group {{ az_resource_group }} -y"
+- name: Remove Redis
+  command: "az redis delete --name {{ az_function_app }}Redis --resource-group {{ az_resource_group }} -y"
 
 - name: Remove App
   azure_rm_webapp:

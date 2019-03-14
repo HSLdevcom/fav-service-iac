@@ -1,0 +1,83 @@
+- name: Get redis access keys
+  shell: >
+    az redis list-keys 
+    --name {{ az_project }}Redis
+    -g {{ az_resource_group }} | jq -M -j '.primaryKey'
+  register: redis_keys
+
+- name: Include vars
+  include_vars:
+    file: local.settings.json
+
+- name: Get redis hostname
+  shell: >
+    az redis show
+    -n {{ az_function_app }}Redis
+    -g {{ az_resource_group }} | jq -M -j '.hostName'
+  register: redis_hostname
+
+- name: Get redis ssl port
+  shell: >
+    az redis show
+    -n {{ az_function_app }}Redis
+    -g {{ az_resource_group }} | jq -M -j '.sslPort'
+  register: redis_ssl_port
+
+- name: Configure app
+  command: >
+    az functionapp config appsettings set
+    --name {{ az_function_app }}
+    --resource-group {{ az_resource_group }}
+    --settings
+    clientId={{ Values.clientId }}
+    clientCredentials="{{ Values.clientCredentials }}"
+    hslIdUrl={{ Values.hslIdUrl }}
+    redisHost={{ redis_hostname.stdout }}
+    redisPort={{ redis_ssl_port.stdout }}
+    redisPass={{ redis_keys.stdout }}
+    FAVORITES_HOST={{ az_function_app }}.azurewebsites.net
+
+- name: Configure deployment options
+  command: >
+    az resource update
+    --resource-group {{ az_resource_group }}
+    --namespace Microsoft.Web
+    --parent sites/{{ az_function_app }}
+    --resource-type sourcecontrols
+    --name web
+    --set
+    properties.repoUrl="{{ az_git_repo }}"
+    properties.branch={{ az_git_branch }}
+    properties.isMercurial=false
+    properties.isManualIntegration=true
+    properties.deploymentRollbackEnabled=false
+  ignore_errors: yes
+
+- name: Get kudu credentials
+  shell: >
+    az functionapp deployment list-publishing-profiles
+    --name {{ az_function_app }}
+    --resource-group {{ az_resource_group }} | jq -j -c -M 'map(select(.publishMethod | contains ("MSDeploy"))) | .[0] | @text "\(.userName):\(.userPWD)"' | base64 -w 0
+  register: kudu_creds
+
+- name: Ensure ssh key
+  uri:
+    url: https://{{ az_function_app }}.scm.azurewebsites.net/sshKey?ensurePublicKey=1
+    headers:
+      authorization: "Basic {{ kudu_creds.stdout }}"
+  register: response
+
+- name: Get deployment trigger url
+  shell: >
+    az functionapp deployment list-publishing-credentials
+    --name {{ az_function_app }}
+    -g {{ az_resource_group }} | jq -j '@text "\(.scmUri)/deploy"'
+  register: deployment_trigger
+
+- name: Output ssh key
+  debug:
+    var: response.json
+
+- name: Output deployment trigger url
+  debug:
+    var: deployment_trigger.stdout
