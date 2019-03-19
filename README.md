@@ -47,3 +47,4 @@ Copy the deployment trigger url to Settings -> Integrations -> Webhook
 ## Notes
 - Testing app provisioning playbook locally with -CD fails because the app plan and resource group it needs are not really created.
 - Provisioning the redis cache can take a long time (20min+)
+- The Suosikit mikropalvelu backend relies on JWT-validation done in Azure Api Management Gateway.
