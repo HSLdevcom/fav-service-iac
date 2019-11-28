@@ -2,19 +2,6 @@
 
 This repository contains Ansible playbooks for provisioning and configuring infrastructure for Suosikit mikropalvelu backend services.
 
-## Usage
-
-- Create a new key for the service principal user yritysportaali-iac in Azure Portal
-- Create an Azure credentials file if one does not exist already: `~/.azure/credentials`
-- Copy the following to the file, and fill the values from the Azure portal:
-
-``` [fav-service]
-subscription_id=
-client_id=
-secret=
-tenant=
-```
-
 # Setting up the environment
 
 There are three environments set up in `env/`. Dev, test and prod but you can add any amount if you copy the variables.
@@ -26,7 +13,10 @@ az_git_branch: test
 
 The environment consists of a suffix for azure under which it will create the resource group, function app and redis cache. Git branch is which branch you want to set up for it to automatically pull changes from.
 
+Set the DEFAULT_SUBSCRIPTION environment variable with the subscription id from Azure Portal before running the `start-ansible-shell.sh` script.
+
 - Run the azure-ansible container with the script `start-ansible-shell.sh`
+- The container now uses devicelogin instead of service principals
 - You should now be able to run a provisioning playbook in the Ansible shell
 
 ## Playbooks
